@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<script type="text/javascript" src="../index.js"></script>
+</head>
+<body>
+
+	<script type="text/javascript">
+		var pm = new PMPlus({
+			sendDomain: 'http://my.local.com:8080'
+		});
+
+		var iframe = document.createElement('iframe');
+		iframe.onload = function() {
+			pm.send({
+				w: iframe.contentWindow,
+				channel: 'fun',
+				data: 'check this out',
+				callback: function(success, response) {
+					console.log('Response', success, response);
+				}
+			});
+		};
+		iframe.src = 'http://my.local.com:8080/iframe.html';
+		document.body.appendChild(iframe);
+
+	</script>
+</body>
+</html>

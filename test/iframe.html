@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<script type="text/javascript" src="../index.js"></script>
+</head>
+<body>
+<script type="text/javascript">
+	var pm = new PMPlus({
+		listenDomain: 'http://my.local.com:8080'
+	});
+
+	pm.listen('fun', function(data, respond) {
+		console.log('Data: ', data);
+		respond(true, 'got it');
+	});
+</script>
+</body>
+</html>
