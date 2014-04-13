@@ -1,0 +1,36 @@
+{
+  "name": "PostMessage-Plus",
+  "version": "0.1.0",
+  "description": "Send messages accross windows using a simple API",
+  "main": "PMPlus.js",
+  "dependencies": {},
+  "devDependencies": {
+    "karma": "^0.12.6",
+    "node-static": "^0.7.3",
+    "karma-jasmine": "^0.1.5",
+    "karma-phantomjs-launcher": "^0.1.4",
+    "grunt-contrib-uglify": "^0.4.0",
+    "grunt": "^0.4.4",
+    "grunt-karma": "^0.8.2",
+    "grunt-contrib-jshint": "^0.10.0"
+  },
+  "scripts": {
+    "test": "grunt test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/taylorhakes/postmessage-plus.git"
+  },
+  "keywords": [
+    "postmessage",
+    "communication",
+    "iframe",
+    "windows"
+  ],
+  "author": "Taylor Hakes",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/taylorhakes/postmessage-plus/issues"
+  },
+  "homepage": "https://github.com/taylorhakes/postmessage-plus"
+}

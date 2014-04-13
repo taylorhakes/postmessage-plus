@@ -1,13 +1,15 @@
 (function (global, undefined) {
+	'use strict';
 	/**
 	 * Send and Receive message from other windows
-	 * @param options {object}
-	 * @param options.listenDomain {string|Array} Domain(s) to listen to messages from
-	 * @param options.sendDomain {string} Default send domain. Can specify message specific domain in `send` method
-	 * @param options.timeout {number} Milliseconds to wait for a response when sending a message
+	 * @param [options] {object}
+	 * @param [options.listenDomain] {string|Array} Domain(s) to listen to messages from
+	 * @param [options.sendDomain] {string} Default send domain. Can specify message specific domain in `send` method
+	 * @param [options.timeout] {number} Milliseconds to wait for a response when sending a message
 	 * @constructor
 	 */
 	function PMPlus(options) {
+		options = options || {};
 		if (typeof options.listenDomain === 'string') {
 			options.listenDomain = [options.listenDomain];
 		}
@@ -48,7 +50,7 @@
 			this._rListeners[params.channel][info.id] = {
 				timeout: setTimeout(function () {
 					params.callback(false, 'Timeout');
-					delete me._rListeners[params.channel][info.id]
+					delete me._rListeners[params.channel][info.id];
 				}, this._timeout),
 				callback: params.callback,
 				domain: domain
@@ -63,7 +65,7 @@
 	 * 		has the form: function(data {*}, respond {Function}) { ... }
 	 */
 	PMPlus.prototype.listen = function (channel, callback) {
-		if(!this._listenD.length) throw new Error('Not listening to any domains. Specify domains in Constructor.')
+		if(!this._listenD.length) throw new Error('Not listening to any domains. Specify domains in Constructor.');
 		addEvent.call(this);
 		if (!this._listeners[channel]) {
 			this._listeners[channel] = [];
@@ -78,7 +80,7 @@
 	PMPlus.prototype.destroy = removeEvent;
 
 	PMPlus.prototype._onMessage = function (e) {
-		var info, response, k, keys, i, responded, onRespond, isListen = checkListenDomain.call(this,
+		var info, response, k, len, keys, i, responded, onRespond, isListen = checkListenDomain.call(this,
 				e.origin), isResponse = checkResponseDomain.call(this, e.origin);
 
 		// Ignore messages from bad domains
@@ -88,7 +90,7 @@
 
 		try {
 			info = JSON.parse(e.data);
-		} catch (e) {
+		} catch (error) {
 			// Some other way of sending data, ignore
 			return;
 		}
@@ -117,21 +119,21 @@
 			for (i = 0, len = this._listeners[info.channel].length; i < len; i++) {
 				try {
 					this._listeners[info.channel][i](info.data, onRespond);
-				} catch (e) {
+				} catch (error) {
 					onRespond(false, 'Unknown Error');
 				}
 			}
 		} else if (info.type === 'response' && this._rListeners[info.channel] && this._rListeners[info.channel][info.id] && this._rListeners[info.channel][info.id].domain === e.origin) {
 			clearTimeout(this._rListeners[info.channel][info.id].timeout);
 			this._rListeners[info.channel][info.id].callback(info.success, info.data);
-			delete this._rListeners[info.channel][info.id]
+			delete this._rListeners[info.channel][info.id];
 
 			keys = false;
 			for (k in this._rListeners[info.channel]) {
 				keys = true;
 				break;
 			}
-			if (!keys) delete this._rListeners[info.channel]
+			if (!keys) delete this._rListeners[info.channel];
 		}
 	};
 
@@ -140,8 +142,10 @@
 	}
 
 	function checkListenDomain(domain) {
+		/*jshint validthis: true */
 		for (var i = 0, len = this._listenD.length; i < len; i++) {
-			if (domain.match(new RegExp(this._listenD[i]))) {
+			if (domain === this._listenD[i] ||
+				(this._listenD[i] instanceof RegExp && domain.match(this._listenD[i]))) {
 				return true;
 			}
 		}
@@ -149,18 +153,20 @@
 	}
 
 	function checkResponseDomain(domain) {
+		/*jshint validthis: true */
 		if (this._sendD === domain) return true;
 		for (var channel in this._rListeners) {
 			for (var message in this._rListeners[channel]) {
-				if (this._rListeners[channel][message] === domain) {
+				if (this._rListeners[channel][message].domain === domain) {
 					return true;
 				}
 			}
 		}
-		return false
+		return false;
 	}
 
 	function addEvent() {
+		/*jshint validthis: true */
 		var me = this;
 		if (this._eventFn) {
 			return;
@@ -171,18 +177,19 @@
 		if (window.addEventListener) {
 			window.addEventListener('message', this._eventFn);
 		} else {
-			window.attachEvent('onmessage', this._eventFn)
+			window.attachEvent('onmessage', this._eventFn);
 		}
 	}
 
 	function removeEvent() {
+		/*jshint validthis: true */
 		if (!this._eventFn) {
 			return;
 		}
 		if (window.removeEventListener) {
 			window.removeEventListener('message', this._eventFn);
 		} else {
-			window.detachEvent('onmessage', this._eventFn)
+			window.detachEvent('onmessage', this._eventFn);
 		}
 		this._eventFn = undefined;
 	}
@@ -191,11 +198,11 @@
 		var text = "";
 		var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-		for (var i = 0; i < 20; i++) {
+		for (var i = 0; i < 15; i++) {
 			text += possible.charAt(Math.floor(Math.random() * possible.length));
 		}
 
-		return text;
+		return +(new Date()) + text;
 	}
 
 	global.PMPlus = PMPlus;
