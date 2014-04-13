@@ -1,4 +1,4 @@
-postmessage-plus
+postmessage-plus [![Build Status](https://travis-ci.org/taylorhakes/postmessage-plus.png?branch=master)](https://travis-ci.org/taylorhakes/postmessage-plus)
 ================
 
 Simple postmessage library. Provides a common API for interacting the window.postMessage and security against listening to dangerous messages.
