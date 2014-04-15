@@ -10,7 +10,7 @@
 	 */
 	function PMPlus(options) {
 		options = options || {};
-		if (typeof options.listenDomain === 'string') {
+		if (options.listenDomain && Object.prototype.toString.call(options.listenDomain) !== '[object Array]') {
 			options.listenDomain = [options.listenDomain];
 		}
 		this._timeout = options.timeout || 3000;

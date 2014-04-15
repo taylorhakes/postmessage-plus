@@ -799,6 +799,44 @@
 				expect(postMessageData.success).toBe(false);
 				expect(postMessageSpy.argsForCall[0][1]).toBe(domain);
 			});
+			it("Check regex outside Array", function() {
+				var domain = new RegExp('http://test.com'),
+					pm = new PMPlus({
+						listenDomain: domain
+					}),
+					channel = 'myChannel';
+
+				var listenSpy = jasmine.createSpy('listen');
+				pm.listen(channel, listenSpy);
+
+				var fn = addEventSpy.argsForCall[0][1];
+				var message = {
+					id: '999',
+					channel: channel,
+					data: 'cool',
+					type: 'message'
+				};
+
+				fn({
+					origin: 'http://test.com',
+					source: window,
+					data: JSON.stringify(message)
+				});
+
+				var respondFn = listenSpy.argsForCall[0][1];
+
+				var respondData = 'beans';
+				respondFn(false, respondData);
+
+				var postMessageData = JSON.parse(postMessageSpy.argsForCall[0][0]);
+
+				expect(postMessageData.id).toBe(message.id);
+				expect(postMessageData.type).toBe('response');
+				expect(postMessageData.channel).toBe(message.channel);
+				expect(postMessageData.data).toBe(respondData);
+				expect(postMessageData.success).toBe(false);
+				expect(postMessageSpy.argsForCall[0][1]).toBe('http://test.com');
+			});
 		});
 	});
 
