@@ -14,6 +14,7 @@
 			options.listenDomain = [options.listenDomain];
 		}
 		this._timeout = options.timeout || 3000;
+		this._listenTimeout = options.listenTimeout || 100;
 		this._sendD = options.sendDomain;
 		this._listenD = options.listenDomain || [];
 		this._listeners = {};
@@ -35,7 +36,7 @@
 				channel: params.channel,
 				data: params.data,
 				type: 'message'
-			}, me = this, domain = params.domain || this._sendD;
+			}, me = this, domain = params.domain || this._sendD, timeout, listenTimeout;
 
 		if (!this._sendD && !params.domain) {
 			throw new Error('Must specify domain to send message. Default in Constructor or message specific.');
@@ -47,11 +48,18 @@
 		sendMessage(params.w, info, domain);
 		addEvent.call(this);
 		if (!this._rListeners[params.channel][info.id] && params.callback) {
+			timeout = setTimeout(function () {
+				clearTimeout(listenTimeout);
+				params.callback(false, 'Timeout');
+				delete me._rListeners[params.channel][info.id];
+			}, this._timeout);
+			listenTimeout = setTimeout(function () {
+				params.callback(false, 'No listener');
+				delete me._rListeners[params.channel][info.id];
+			}, this._listenTimeout);
 			this._rListeners[params.channel][info.id] = {
-				timeout: setTimeout(function () {
-					params.callback(false, 'Timeout');
-					delete me._rListeners[params.channel][info.id];
-				}, this._timeout),
+				timeout: timeout,
+				listenTimeout: listenTimeout,
 				callback: params.callback,
 				domain: domain
 			};
@@ -80,7 +88,7 @@
 	PMPlus.prototype.destroy = removeEvent;
 
 	PMPlus.prototype._onMessage = function (e) {
-		var info, response, k, len, keys, i, responded, onRespond, isListen = checkListenDomain.call(this,
+		var info, response, update, k, len, keys, i, responded = false, onRespond, isListen = checkListenDomain.call(this,
 				e.origin), isResponse = checkResponseDomain.call(this, e.origin);
 
 		// Ignore messages from bad domains
@@ -96,7 +104,7 @@
 		}
 
 		if (info.type === 'message' && isListen) {
-			responded = false;
+
 			onRespond = function (success, data) {
 				// Don't respond twice
 				if (responded) return;
@@ -119,26 +127,44 @@
 			for (i = 0, len = this._listeners[info.channel].length; i < len; i++) {
 				try {
 					this._listeners[info.channel][i](info.data, onRespond);
+					// Update the sender to say their message was received and is processing
+					if(!responded) {
+						update = {
+							id: info.id,
+							channel: info.channel,
+							type: 'listening'
+						};
+						sendMessage(e.source, update, e.origin);
+					}
 				} catch (error) {
 					onRespond(false, 'Unknown Error');
 				}
 			}
-		} else if (info.type === 'response' && this._rListeners[info.channel] && this._rListeners[info.channel][info.id] && this._rListeners[info.channel][info.id].domain === e.origin) {
-			clearTimeout(this._rListeners[info.channel][info.id].timeout);
-			this._rListeners[info.channel][info.id].callback(info.success, info.data);
-			delete this._rListeners[info.channel][info.id];
+		} else if(this._rListeners[info.channel] && this._rListeners[info.channel][info.id] && this._rListeners[info.channel][info.id].domain === e.origin) {
+			if(info.type === 'listening') {
+				clearTimeout(this._rListeners[info.channel][info.id].listenTimeout);
+			} else if(info.type === 'response') {
+				clearAllTimeouts(this._rListeners[info.channel][info.id]);
+				this._rListeners[info.channel][info.id].callback(info.success, info.data);
+				delete this._rListeners[info.channel][info.id];
 
-			keys = false;
-			for (k in this._rListeners[info.channel]) {
-				keys = true;
-				break;
+				keys = false;
+				for (k in this._rListeners[info.channel]) {
+					keys = true;
+					break;
+				}
+				if (!keys) delete this._rListeners[info.channel];
 			}
-			if (!keys) delete this._rListeners[info.channel];
 		}
 	};
 
 	function sendMessage(w, info, domain) {
 		w.postMessage(JSON.stringify(info), domain);
+	}
+
+	function clearAllTimeouts(obj) {
+		clearTimeout(obj.listenTimeout);
+		clearTimeout(obj.timeout);
 	}
 
 	function checkListenDomain(domain) {

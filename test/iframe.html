@@ -2,7 +2,7 @@
 <html>
 <head>
 	<title></title>
-	<script type="text/javascript" src="../index.js"></script>
+	<script type="text/javascript" src="../PMPlus.js"></script>
 </head>
 <body>
 <script type="text/javascript">
@@ -12,7 +12,12 @@
 
 	pm.listen('fun', function(data, respond) {
 		console.log('Data: ', data);
-		respond(true, 'got it');
+		var start = new Date();
+		while(new Date() - start < 50) {}
+		setTimeout(function(){
+			respond(true, 'got it');
+		},2000);
+
 	});
 </script>
 </body>

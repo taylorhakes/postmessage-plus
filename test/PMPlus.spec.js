@@ -747,12 +747,21 @@
 					data: JSON.stringify(message)
 				});
 
+				var postMessageData = JSON.parse(postMessageSpy.argsForCall[0][0]);
+
+				expect(postMessageData.id).toBe(message.id);
+				expect(postMessageData.type).toBe('listening');
+				expect(postMessageData.channel).toBe(message.channel);
+				expect(postMessageData.data).toBe(undefined);
+				expect(postMessageData.success).toBe(undefined);
+				expect(postMessageSpy.argsForCall[0][1]).toBe(domain);
+
 				var respondFn = listenSpy.argsForCall[0][1];
 
 				var respondData = 'beans';
 				respondFn(true, respondData);
 
-				var postMessageData = JSON.parse(postMessageSpy.argsForCall[0][0]);
+				postMessageData = JSON.parse(postMessageSpy.argsForCall[1][0]);
 
 				expect(postMessageData.id).toBe(message.id);
 				expect(postMessageData.type).toBe('response');
@@ -784,13 +793,21 @@
 					source: window,
 					data: JSON.stringify(message)
 				});
+				var postMessageData = JSON.parse(postMessageSpy.argsForCall[0][0]);
+
+				expect(postMessageData.id).toBe(message.id);
+				expect(postMessageData.type).toBe('listening');
+				expect(postMessageData.channel).toBe(message.channel);
+				expect(postMessageData.data).toBe(undefined);
+				expect(postMessageData.success).toBe(undefined);
+				expect(postMessageSpy.argsForCall[0][1]).toBe(domain);
 
 				var respondFn = listenSpy.argsForCall[0][1];
 
 				var respondData = 'beans';
 				respondFn(false, respondData);
 
-				var postMessageData = JSON.parse(postMessageSpy.argsForCall[0][0]);
+				postMessageData = JSON.parse(postMessageSpy.argsForCall[1][0]);
 
 				expect(postMessageData.id).toBe(message.id);
 				expect(postMessageData.type).toBe('response');
@@ -823,12 +840,21 @@
 					data: JSON.stringify(message)
 				});
 
+				var postMessageData = JSON.parse(postMessageSpy.argsForCall[0][0]);
+
+				expect(postMessageData.id).toBe(message.id);
+				expect(postMessageData.type).toBe('listening');
+				expect(postMessageData.channel).toBe(message.channel);
+				expect(postMessageData.data).toBe(undefined);
+				expect(postMessageData.success).toBe(undefined);
+				expect(postMessageSpy.argsForCall[0][1]).toBe('http://test.com');
+
 				var respondFn = listenSpy.argsForCall[0][1];
 
 				var respondData = 'beans';
 				respondFn(false, respondData);
 
-				var postMessageData = JSON.parse(postMessageSpy.argsForCall[0][0]);
+				postMessageData = JSON.parse(postMessageSpy.argsForCall[1][0]);
 
 				expect(postMessageData.id).toBe(message.id);
 				expect(postMessageData.type).toBe('response');
