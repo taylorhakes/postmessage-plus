@@ -1,5 +1,5 @@
 {
-  "name": "PostMessage-Plus",
+  "name": "postmessage-plus",
   "version": "0.2.1",
   "description": "Send messages accross windows using a simple API",
   "main": "PMPlus.js",
