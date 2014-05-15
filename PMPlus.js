@@ -32,7 +32,7 @@
 	 */
 	PMPlus.prototype.send = function (params) {
 		var info = {
-				id: generateId(),
+				id: Math.random(),
 				channel: params.channel,
 				data: params.data,
 				type: 'message'
@@ -219,17 +219,5 @@
 		}
 		this._eventFn = undefined;
 	}
-
-	function generateId() {
-		var text = "";
-		var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-		for (var i = 0; i < 15; i++) {
-			text += possible.charAt(Math.floor(Math.random() * possible.length));
-		}
-
-		return +(new Date()) + text;
-	}
-
 	global.PMPlus = PMPlus;
 })(this, void 0);
