@@ -219,5 +219,10 @@
 		}
 		this._eventFn = undefined;
 	}
-	global.PMPlus = PMPlus;
+
+	if(typeof module !== 'undefined' && module.exports) {
+		module.exports = PMPlus;
+	} else {
+		global.PMPlus = PMPlus;
+	}
 })(this, void 0);
