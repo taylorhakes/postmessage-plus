@@ -45,7 +45,6 @@
 			this._rListeners[params.channel] = {};
 		}
 
-		sendMessage(params.w, info, domain);
 		addEvent.call(this);
 		if (!this._rListeners[params.channel][info.id] && params.callback) {
 			timeout = setTimeout(function () {
@@ -54,6 +53,7 @@
 				delete me._rListeners[params.channel][info.id];
 			}, this._timeout);
 			listenTimeout = setTimeout(function () {
+				clearTimeout(timeout);
 				params.callback(false, 'No listener');
 				delete me._rListeners[params.channel][info.id];
 			}, this._listenTimeout);
@@ -64,6 +64,8 @@
 				domain: domain
 			};
 		}
+
+		sendMessage(params.w, info, domain);
 	};
 
 	/**
@@ -88,8 +90,12 @@
 	PMPlus.prototype.destroy = removeEvent;
 
 	PMPlus.prototype._onMessage = function (e) {
-		var info, response, update, k, len, keys, i, responded = false, onRespond, isListen = checkListenDomain.call(this,
-				e.origin), isResponse = checkResponseDomain.call(this, e.origin);
+		var info, response, update, k, len, keys, i, onRespond,
+			responded = false,
+			w = e.source,
+			origin = e.origin,
+			isListen = checkListenDomain.call(this, origin),
+			isResponse = checkResponseDomain.call(this, origin);
 
 		// Ignore messages from bad domains
 		if (!isListen && !isResponse) {
@@ -112,7 +118,7 @@
 				responded = true;
 				response.success = success;
 				response.data = data;
-				sendMessage(e.source, response, e.origin);
+				sendMessage(w, response, origin);
 			};
 			response = {
 				id: info.id,
@@ -134,13 +140,13 @@
 							channel: info.channel,
 							type: 'listening'
 						};
-						sendMessage(e.source, update, e.origin);
+						sendMessage(w, update, origin);
 					}
 				} catch (error) {
 					onRespond(false, 'Unknown Error');
 				}
 			}
-		} else if(this._rListeners[info.channel] && this._rListeners[info.channel][info.id] && this._rListeners[info.channel][info.id].domain === e.origin) {
+		} else if(this._rListeners[info.channel] && this._rListeners[info.channel][info.id] && this._rListeners[info.channel][info.id].domain === origin) {
 			if(info.type === 'listening') {
 				clearTimeout(this._rListeners[info.channel][info.id].listenTimeout);
 			} else if(info.type === 'response') {
